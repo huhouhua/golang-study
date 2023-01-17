@@ -1,1 +1,5 @@
-package golang_study
+package main
+
+func main() {
+
+}

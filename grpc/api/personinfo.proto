@@ -1,0 +1,39 @@
+
+syntax = "proto3"; // 传输协议
+//import "google/protobuf/empty.proto";
+
+package api;  // 包名称
+
+option go_package = "../api";  //生成go调用文件目录
+
+//定义服务
+service PersonalInfo{
+  //比如定义一个注册人的方法,并且返回出去
+  rpc Register(PersonalInformation) returns(Empty){}
+  rpc Get(PersonalInformationRequest) returns(PersonalInformation){}
+  rpc GetAll(Empty) returns(PesrsonalInformationList){}
+  rpc Remove(PersonalInformationRequest) returns(Empty){};
+}
+
+message Empty{
+
+}
+
+message Result{
+   bool IsSuccess =1;
+}
+message PersonalInformationRequest{
+    int64 id =1;
+}
+
+//函数请求模型、返回模型等
+message PesrsonalInformationList{
+  repeated  PersonalInformation items = 1;
+}
+
+message PersonalInformation{
+  int64  id = 1;
+  string  name =2;
+  string  sex =3;
+  float  tall =4;
+}
