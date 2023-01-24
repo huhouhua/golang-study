@@ -21,15 +21,22 @@ type Server interface {
 }
 
 type HTTPServer struct {
+	*router
 }
 
 type HTTPSServer struct {
 	HTTPServer
 }
 
+func NewHTTPServer() *HTTPServer {
+	return &HTTPServer{
+		router: newRouter(),
+	}
+}
+
 func (H *HTTPServer) AddRoute(method string, path string, handlerFunc HandlerFunc) {
 	//TODO implement me
-	panic("implement me")
+	//panic("implement me")
 }
 
 func (H *HTTPServer) Get(method string, path string, handlerFunc HandlerFunc) {
