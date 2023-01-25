@@ -1,6 +1,6 @@
 //go:build e2e
 
-package web
+package v3
 
 import (
 	"log"

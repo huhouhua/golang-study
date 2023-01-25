@@ -1,4 +1,4 @@
-package web
+package v3
 
 import (
 	"fmt"
@@ -17,6 +17,9 @@ type node struct {
 	//子path 到子节点的映射
 	children map[string]*node
 
+	//通匹符匹配
+	starChild *node
+
 	//用户注册处理逻辑
 	handler HandlerFunc
 }
@@ -29,6 +32,12 @@ func newRouter() *router {
 
 // 创建子节点
 func (n *node) childOfCreate(seg string) *node {
+	if seg == "*" {
+		n.starChild = &node{
+			path: seg,
+		}
+		return n.starChild
+	}
 	if n.children == nil {
 		n.children = map[string]*node{}
 	}

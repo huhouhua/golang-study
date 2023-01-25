@@ -1,4 +1,4 @@
-package web
+package v3
 
 import (
 	"fmt"
@@ -7,6 +7,10 @@ import (
 	"reflect"
 	"testing"
 )
+
+//func GenerateTest_With_Asterisk() {
+//
+//}
 
 var mockHandler HandlerFunc = func(ctx *Context) {
 
@@ -23,6 +27,22 @@ func TestRouter_AddRoute(t *testing.T) {
 		},
 		{
 			method: http.MethodGet,
+			path:   "/*",
+		},
+		{
+			method: http.MethodGet,
+			path:   "/*/*",
+		},
+		{
+			method: http.MethodGet,
+			path:   "/*/abc",
+		},
+		{
+			method: http.MethodGet,
+			path:   "/*/abc/ddd",
+		},
+		{
+			method: http.MethodGet,
 			path:   "/user",
 		},
 		{
@@ -32,6 +52,10 @@ func TestRouter_AddRoute(t *testing.T) {
 		{
 			method: http.MethodGet,
 			path:   "/order/detail",
+		},
+		{
+			method: http.MethodGet,
+			path:   "/order/*",
 		},
 		{
 			method: http.MethodPost,
@@ -74,6 +98,10 @@ func TestRouter_AddRoute(t *testing.T) {
 								path:    "detail",
 								handler: mockHandler,
 							},
+						},
+						starChild: &node{
+							path:    "*",
+							handler: mockHandler,
 						},
 					},
 				},
@@ -293,6 +321,13 @@ func (n *node) equal(y *node) (string, bool) {
 	if len(n.children) != len(y.children) {
 		return fmt.Sprintf("子节点数量不相等！"), false
 	}
+	if n.starChild != nil {
+		msg, ok := n.starChild.equal(y.starChild)
+		if !ok {
+			return msg, ok
+		}
+	}
+
 	if msg, ok := equalHandler(n.handler, y.handler); !ok {
 		return msg, ok
 	}
