@@ -8,33 +8,58 @@ import (
 	"testing"
 )
 
+var mockHandler HandlerFunc = func(ctx Context) {
+
+}
+
 func TestRouter_AddRoute(t *testing.T) {
-	testRoutes := []struct {
+	caseRouters := []struct {
 		method string
 		path   string
 	}{
 		{
 			method: http.MethodGet,
+			path:   "/",
+		},
+		{
+			method: http.MethodGet,
+			path:   "/user",
+		},
+		{
+			method: http.MethodGet,
 			path:   "/user/home",
 		},
+		{
+			method: http.MethodGet,
+			path:   "/order/detail",
+		},
+		{
+			method: http.MethodPost,
+			path:   "/",
+		},
+		{
+			method: http.MethodPost,
+			path:   "/order/create",
+		},
+		{
+			method: http.MethodPost,
+			path:   "/login",
+		},
 	}
-
-	var mockHandler HandlerFunc = func(ctx Context) {
-
-	}
-
 	r := newRouter()
-	for _, route := range testRoutes {
+	for _, route := range caseRouters {
 		r.AddRoute(route.method, route.path, mockHandler)
 	}
 
 	wantRouter := &router{
 		trees: map[string]*node{
 			http.MethodGet: &node{
-				path: "/",
+				path:    "/",
+				handler: mockHandler,
 				children: map[string]*node{
 					"user": &node{
-						path: "user",
+						path:    "user",
+						handler: mockHandler,
 						children: map[string]*node{
 							"home": &node{
 								path:    "home",
@@ -42,12 +67,62 @@ func TestRouter_AddRoute(t *testing.T) {
 							},
 						},
 					},
+					"order": &node{
+						path: "order",
+						children: map[string]*node{
+							"detail": &node{
+								path:    "detail",
+								handler: mockHandler,
+							},
+						},
+					},
+				},
+			},
+			http.MethodPost: &node{
+				path:    "/",
+				handler: mockHandler,
+				children: map[string]*node{
+					"order": &node{
+						path: "order",
+						children: map[string]*node{
+							"create": &node{
+								path:    "create",
+								handler: mockHandler,
+							},
+						},
+					},
+					"login": &node{
+						path:    "login",
+						handler: mockHandler,
+					},
 				},
 			},
 		},
 	}
 	msg, ok := wantRouter.equal(r)
 	assert.True(t, ok, msg)
+}
+
+// 路径校验测试
+func TestRouter_Path_Validation(t *testing.T) {
+	r := newRouter()
+
+	assert.Panicsf(t, func() {
+		r.AddRoute(http.MethodGet, "", mockHandler)
+	}, "path不能为空！")
+
+	assert.Panicsf(t, func() {
+		r.AddRoute(http.MethodGet, "a/", mockHandler)
+	}, "web:路径必须以 / 开头！")
+
+	assert.Panicsf(t, func() {
+		r.AddRoute(http.MethodGet, "/a/b/c/", mockHandler)
+	}, "web:路径必须以 / 结尾！")
+
+	assert.Panicsf(t, func() {
+		r.AddRoute(http.MethodGet, "/a//b/", mockHandler)
+	}, "web:不能有连续的 / ")
+
 }
 
 // string 返回的是一个错误信息，帮助我们排查问题

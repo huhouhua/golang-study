@@ -40,6 +40,9 @@ func (n *node) childOfCreate(seg string) *node {
 }
 
 func (r *router) AddRoute(method string, path string, handlerFunc HandlerFunc) {
+	if path == "" {
+		panic("path不能为空！")
+	}
 	//找到树
 	root, ok := r.trees[method]
 	if !ok {
@@ -49,10 +52,26 @@ func (r *router) AddRoute(method string, path string, handlerFunc HandlerFunc) {
 		}
 		r.trees[method] = root
 	}
+	if path[0] != '/' {
+		panic("web:路径必须以 / 开头！")
+	}
+	if path != "/" && path[len(path)-1] == '/' {
+		panic("web:路径必须以 / 结尾！")
+	}
+
+	if path == "/" {
+		root.handler = handlerFunc
+		return
+	}
+
 	path = path[1:]
 	//切割path
 	segs := strings.Split(path, "/")
 	for _, seg := range segs {
+		if seg == "" {
+			panic("web:不能有连续的 / ")
+		}
+
 		//递归下去，找到位置
 		//如果有节点不存在，需要创建此节点
 		chidlren := root.childOfCreate(seg)
