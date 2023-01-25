@@ -194,6 +194,10 @@ func TestRouter_findRoute(t *testing.T) {
 			path:   "/order/detail",
 		},
 		{
+			method: http.MethodGet,
+			path:   "/order/*",
+		},
+		{
 			method: http.MethodPost,
 			path:   "/",
 		},
@@ -242,6 +246,17 @@ func TestRouter_findRoute(t *testing.T) {
 			wantNode: &node{
 				handler: mockHandler,
 				path:    "detail",
+			},
+		},
+		{
+			name:        "order start",
+			method:      http.MethodGet,
+			path:        "/order/abc",
+			description: "通配符匹配",
+			wantFound:   true,
+			wantNode: &node{
+				handler: mockHandler,
+				path:    "*",
 			},
 		},
 		{

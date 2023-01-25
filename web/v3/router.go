@@ -51,11 +51,15 @@ func (n *node) childOfCreate(seg string) *node {
 	return res
 }
 
+// childOf 优先匹配静态匹配，匹配不上，再考虑通配符匹配
 func (n *node) childOf(path string) (*node, bool) {
 	if n.children == nil {
-		return nil, false
+		return n.starChild, n.starChild != nil
 	}
 	child, ok := n.children[path]
+	if !ok {
+		return n.starChild, n.starChild != nil
+	}
 	return child, ok
 }
 

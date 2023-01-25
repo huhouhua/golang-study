@@ -38,16 +38,16 @@ func (h *HTTPServer) addRoute(method string, path string, handlerFunc HandlerFun
 	h.router.addRoute(method, path, handlerFunc)
 }
 
-func (h *HTTPServer) Get(method string, path string, handlerFunc HandlerFunc) {
+func (h *HTTPServer) Get(path string, handlerFunc HandlerFunc) {
 	h.addRoute(http.MethodGet, path, handlerFunc)
 }
-func (h *HTTPServer) Post(method string, path string, handlerFunc HandlerFunc) {
+func (h *HTTPServer) Post(path string, handlerFunc HandlerFunc) {
 	h.addRoute(http.MethodPost, path, handlerFunc)
 }
-func (h *HTTPServer) Delete(method string, path string, handlerFunc HandlerFunc) {
+func (h *HTTPServer) Delete(path string, handlerFunc HandlerFunc) {
 	h.addRoute(http.MethodDelete, path, handlerFunc)
 }
-func (h *HTTPServer) Put(method string, path string, handlerFunc HandlerFunc) {
+func (h *HTTPServer) Put(path string, handlerFunc HandlerFunc) {
 	h.addRoute(http.MethodPut, path, handlerFunc)
 }
 
