@@ -8,7 +8,7 @@ import (
 	"testing"
 )
 
-var mockHandler HandlerFunc = func(ctx Context) {
+var mockHandler HandlerFunc = func(ctx *Context) {
 
 }
 

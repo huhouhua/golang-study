@@ -1,4 +1,4 @@
-// go:build
+//go:build e2e
 
 package web
 
@@ -9,9 +9,12 @@ import (
 )
 
 func TestServer(t *testing.T) {
-	h := &HTTPServer{}
-	h.addRoute(http.MethodGet, "/user", func(ctx Context) {
+	h := NewHTTPServer()
+	h.addRoute(http.MethodGet, "/user", func(ctx *Context) {
 
+	})
+	h.addRoute(http.MethodGet, "/order/detail", func(ctx *Context) {
+		ctx.Response.Write([]byte("hello,order detail!"))
 	})
 
 	err := h.Start(":8081")
