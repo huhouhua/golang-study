@@ -48,7 +48,7 @@ func TestRouter_AddRoute(t *testing.T) {
 	}
 	r := newRouter()
 	for _, route := range caseRouters {
-		r.AddRoute(route.method, route.path, mockHandler)
+		r.addRoute(route.method, route.path, mockHandler)
 	}
 
 	wantRouter := &router{
@@ -108,19 +108,19 @@ func TestRouter_Path_Validation(t *testing.T) {
 	r := newRouter()
 
 	assert.Panicsf(t, func() {
-		r.AddRoute(http.MethodGet, "", mockHandler)
+		r.addRoute(http.MethodGet, "", mockHandler)
 	}, "path不能为空！")
 
 	assert.Panicsf(t, func() {
-		r.AddRoute(http.MethodGet, "a/", mockHandler)
+		r.addRoute(http.MethodGet, "a/", mockHandler)
 	}, "web:路径必须以 / 开头！")
 
 	assert.Panicsf(t, func() {
-		r.AddRoute(http.MethodGet, "/a/b/c/", mockHandler)
+		r.addRoute(http.MethodGet, "/a/b/c/", mockHandler)
 	}, "web:路径必须以 / 结尾！")
 
 	assert.Panicsf(t, func() {
-		r.AddRoute(http.MethodGet, "/a//b/", mockHandler)
+		r.addRoute(http.MethodGet, "/a//b/", mockHandler)
 	}, "web:不能有连续的 / ")
 
 }
@@ -128,15 +128,20 @@ func TestRouter_Path_Validation(t *testing.T) {
 // 路径重复校验测试
 func TestRouter_Path_Repetition(t *testing.T) {
 	r := newRouter()
-	r.AddRoute(http.MethodGet, "/", mockHandler)
+	r.addRoute(http.MethodGet, "/", mockHandler)
 	assert.Panicsf(t, func() {
-		r.AddRoute(http.MethodGet, "/", mockHandler)
+		r.addRoute(http.MethodGet, "/", mockHandler)
 	}, "web:路由冲突，重复注册[/]")
 
-	r.AddRoute(http.MethodGet, "/a/b/c", mockHandler)
+	r.addRoute(http.MethodGet, "/a/b/c", mockHandler)
 	assert.Panicsf(t, func() {
-		r.AddRoute(http.MethodGet, "/a/b/c", mockHandler)
+		r.addRoute(http.MethodGet, "/a/b/c", mockHandler)
 	}, "web:路由冲突，重复注册[/a/b/c]")
+}
+
+// 请求方法测试
+func TestRouter_Path_Method(t *testing.T) {
+
 }
 
 // string 返回的是一个错误信息，帮助我们排查问题

@@ -42,7 +42,7 @@ func (n *node) childOfCreate(seg string) *node {
 	return res
 }
 
-func (r *router) AddRoute(method string, path string, handlerFunc HandlerFunc) {
+func (r *router) addRoute(method string, path string, handlerFunc HandlerFunc) {
 	if path == "" {
 		panic("path不能为空！")
 	}

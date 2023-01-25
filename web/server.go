@@ -16,8 +16,8 @@ type Server interface {
 	//Start 服务启动
 	Start(addr string) error
 
-	//AddRoute 添加路由注册，用来处理 请求处理
-	AddRoute(method string, path string, handlerFunc HandlerFunc)
+	//addRoute 添加路由注册，用来处理 请求处理
+	addRoute(method string, path string, handlerFunc HandlerFunc)
 }
 
 type HTTPServer struct {
@@ -34,22 +34,22 @@ func NewHTTPServer() *HTTPServer {
 	}
 }
 
-func (H *HTTPServer) AddRoute(method string, path string, handlerFunc HandlerFunc) {
+func (H *HTTPServer) addRoute(method string, path string, handlerFunc HandlerFunc) {
 	//TODO implement me
 	//panic("implement me")
 }
 
 func (H *HTTPServer) Get(method string, path string, handlerFunc HandlerFunc) {
-	H.AddRoute(http.MethodGet, path, handlerFunc)
+	H.addRoute(http.MethodGet, path, handlerFunc)
 }
 func (H *HTTPServer) Post(method string, path string, handlerFunc HandlerFunc) {
-	H.AddRoute(http.MethodPost, path, handlerFunc)
+	H.addRoute(http.MethodPost, path, handlerFunc)
 }
 func (H *HTTPServer) Delete(method string, path string, handlerFunc HandlerFunc) {
-	H.AddRoute(http.MethodDelete, path, handlerFunc)
+	H.addRoute(http.MethodDelete, path, handlerFunc)
 }
 func (H *HTTPServer) Put(method string, path string, handlerFunc HandlerFunc) {
-	H.AddRoute(http.MethodPut, path, handlerFunc)
+	H.addRoute(http.MethodPut, path, handlerFunc)
 }
 
 // ServeHTTP 处理请求入口,是我们整个Web框架的核心入口，我们将在整个方法内部完成:
