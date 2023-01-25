@@ -42,6 +42,40 @@ func (n *node) childOfCreate(seg string) *node {
 	return res
 }
 
+func (n *node) childOf(path string) (*node, bool) {
+	if n.children == nil {
+		return nil, false
+	}
+	child, ok := n.children[path]
+	return child, ok
+}
+
+func (r *router) findRouter(method string, path string) (*node, bool) {
+	//找出对应的请求方式
+	root, ok := r.trees[method]
+	if !ok {
+		return nil, false
+	}
+
+	if path == "/" {
+		return root, true
+	}
+
+	//把前缀和后缀的 / 都去掉
+	path = strings.Trim(path, "/")
+	segs := strings.Split(path, "/")
+	for _, seg := range segs {
+		child, found := root.childOf(seg)
+		if !found {
+			return nil, false
+		}
+		//找到了，赋值
+		root = child
+	}
+	//找到了，返回节点
+	return root, true
+}
+
 func (r *router) addRoute(method string, path string, handlerFunc HandlerFunc) {
 	if path == "" {
 		panic("path不能为空！")
@@ -81,8 +115,8 @@ func (r *router) addRoute(method string, path string, handlerFunc HandlerFunc) {
 
 		//递归下去，找到位置
 		//如果有节点不存在，需要创建此节点
-		chidlren := root.childOfCreate(seg)
-		root = chidlren
+		child := root.childOfCreate(seg)
+		root = child
 
 	}
 	if root.handler != nil {

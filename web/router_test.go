@@ -13,7 +13,7 @@ var mockHandler HandlerFunc = func(ctx Context) {
 }
 
 func TestRouter_AddRoute(t *testing.T) {
-	caseRouters := []struct {
+	testRouters := []struct {
 		method string
 		path   string
 	}{
@@ -47,7 +47,7 @@ func TestRouter_AddRoute(t *testing.T) {
 		},
 	}
 	r := newRouter()
-	for _, route := range caseRouters {
+	for _, route := range testRouters {
 		r.addRoute(route.method, route.path, mockHandler)
 	}
 
@@ -139,8 +139,131 @@ func TestRouter_Path_Repetition(t *testing.T) {
 	}, "web:路由冲突，重复注册[/a/b/c]")
 }
 
-// 请求方法测试
-func TestRouter_Path_Method(t *testing.T) {
+// 测试查找路由
+func TestRouter_findRoute(t *testing.T) {
+	testRoutes := []struct {
+		method string
+		path   string
+	}{
+		{
+			method: http.MethodDelete,
+			path:   "/",
+		},
+		{
+			method: http.MethodGet,
+			path:   "/",
+		},
+		{
+			method: http.MethodGet,
+			path:   "/user",
+		},
+		{
+			method: http.MethodGet,
+			path:   "/user/home",
+		},
+		{
+			method: http.MethodGet,
+			path:   "/order/detail",
+		},
+		{
+			method: http.MethodPost,
+			path:   "/",
+		},
+		{
+			method: http.MethodPost,
+			path:   "/order/create",
+		},
+		{
+			method: http.MethodPost,
+			path:   "/login",
+		},
+	}
+
+	r := newRouter()
+	for _, route := range testRoutes {
+		r.addRoute(route.method, route.path, mockHandler)
+	}
+	testCases := []struct {
+		name        string
+		method      string
+		path        string
+		description string
+		wantFound   bool
+		wantNode    *node
+	}{
+		{
+			name:        "method no found",
+			method:      http.MethodOptions,
+			path:        "/order/detail",
+			description: "方法都不存在",
+			wantFound:   false,
+		},
+		{
+			name:        "path no found",
+			method:      http.MethodGet,
+			path:        "/wadasdsad",
+			description: "路径不存在！",
+			wantFound:   false,
+		},
+		{
+			name:        "order detail",
+			method:      http.MethodGet,
+			path:        "/order/detail",
+			description: "完全命中",
+			wantFound:   true,
+			wantNode: &node{
+				handler: mockHandler,
+				path:    "detail",
+			},
+		},
+		{
+			name:        "order",
+			method:      http.MethodGet,
+			path:        "/order",
+			description: "命中了，但是没有Handler",
+			wantFound:   true,
+			wantNode: &node{
+				//handler: mockHandler,
+				path: "order",
+				children: map[string]*node{
+					"detail": &node{
+						handler: mockHandler,
+						path:    "detail",
+					},
+				},
+			},
+		},
+		{
+			name:        "root",
+			method:      http.MethodDelete,
+			path:        "/",
+			description: "根节点",
+			wantFound:   true,
+			wantNode: &node{
+				path:    "/",
+				handler: mockHandler,
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			fmt.Printf("描述:%s \n", tc.description)
+
+			n, found := r.findRouter(tc.method, tc.path)
+			assert.Equal(t, tc.wantFound, found)
+			if !found {
+				return
+			}
+			assert.Equal(t, tc.wantNode.path, n.path)
+
+			msg, ok := tc.wantNode.equal(n)
+			assert.True(t, ok, msg)
+
+			msg, ok = equalHandler(tc.wantNode.handler, n.handler)
+			assert.True(t, ok, msg)
+		})
+	}
 
 }
 
@@ -170,13 +293,9 @@ func (n *node) equal(y *node) (string, bool) {
 	if len(n.children) != len(y.children) {
 		return fmt.Sprintf("子节点数量不相等！"), false
 	}
-
-	nhandler := reflect.ValueOf(n.handler)
-	yhandler := reflect.ValueOf(y.handler)
-	if nhandler != yhandler {
-		return fmt.Sprintf("handler 不相等！"), false
+	if msg, ok := equalHandler(n.handler, y.handler); !ok {
+		return msg, ok
 	}
-
 	for path, c := range n.children {
 
 		dst, ok := y.children[path]
@@ -189,6 +308,16 @@ func (n *node) equal(y *node) (string, bool) {
 			return msg, false
 		}
 
+	}
+	return "", true
+}
+
+// 比较处理器是否相等
+func equalHandler(n HandlerFunc, y HandlerFunc) (string, bool) {
+	nHandler := reflect.ValueOf(n)
+	yHandler := reflect.ValueOf(y)
+	if nHandler != yHandler {
+		return fmt.Sprintf("handler 不相等！"), false
 	}
 	return "", true
 }
