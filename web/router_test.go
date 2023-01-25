@@ -125,9 +125,22 @@ func TestRouter_Path_Validation(t *testing.T) {
 
 }
 
+// 路径重复校验测试
+func TestRouter_Path_Repetition(t *testing.T) {
+	r := newRouter()
+	r.AddRoute(http.MethodGet, "/", mockHandler)
+	assert.Panicsf(t, func() {
+		r.AddRoute(http.MethodGet, "/", mockHandler)
+	}, "web:路由冲突，重复注册[/]")
+
+	r.AddRoute(http.MethodGet, "/a/b/c", mockHandler)
+	assert.Panicsf(t, func() {
+		r.AddRoute(http.MethodGet, "/a/b/c", mockHandler)
+	}, "web:路由冲突，重复注册[/a/b/c]")
+}
+
 // string 返回的是一个错误信息，帮助我们排查问题
 // bool 是代表是否真的相等。
-
 func (r *router) equal(y *router) (string, bool) {
 	for k, v := range r.trees {
 

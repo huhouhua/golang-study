@@ -1,6 +1,9 @@
 package web
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 // 用来支持对路由树的操作，做请求路径匹配
 type router struct {
@@ -59,14 +62,18 @@ func (r *router) AddRoute(method string, path string, handlerFunc HandlerFunc) {
 		panic("web:路径必须以 / 结尾！")
 	}
 
+	//如果是根节点特殊处理下
 	if path == "/" {
+		//根节点重复注册
+		if root.handler != nil {
+			panic("web:路由冲突，重复注册[/]")
+		}
 		root.handler = handlerFunc
 		return
 	}
 
-	path = path[1:]
 	//切割path
-	segs := strings.Split(path, "/")
+	segs := strings.Split(path[1:], "/")
 	for _, seg := range segs {
 		if seg == "" {
 			panic("web:不能有连续的 / ")
@@ -77,6 +84,9 @@ func (r *router) AddRoute(method string, path string, handlerFunc HandlerFunc) {
 		chidlren := root.childOfCreate(seg)
 		root = chidlren
 
+	}
+	if root.handler != nil {
+		panic(fmt.Sprintf("web:路由冲突，重复注册[%s]", path))
 	}
 	root.handler = handlerFunc
 }
