@@ -2,11 +2,10 @@ package v3
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"net/http"
 	"reflect"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 //func GenerateTest_With_Asterisk() {
@@ -193,7 +192,6 @@ func TestRoute_Path_Conflict(t *testing.T) {
 
 // 测试查找路由
 func TestRouter_findRoute(t *testing.T) {
-
 	testRoutes := []struct {
 		method string
 		path   string
