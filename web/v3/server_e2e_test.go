@@ -22,6 +22,9 @@ func TestServer(t *testing.T) {
 	h.Get("/order/*/ass", func(ctx *Context) {
 		ctx.Response.Write([]byte(fmt.Sprintf("hello 通配符,%s", ctx.Request.URL.Path)))
 	})
+       h.Get("/order/*/*/ass", func(ctx *Context) {
+		ctx.Response.Write([]byte(fmt.Sprintf("hello 通配符,%s", ctx.Request.URL.Path)))
+	})
 	err := h.Start(":8081")
 	if err != nil {
 		log.Fatal(err)
