@@ -55,6 +55,10 @@ func TestRouter_AddRoute(t *testing.T) {
 		},
 		{
 			method: http.MethodGet,
+			path:   "/order/detail/:id",
+		},
+		{
+			method: http.MethodGet,
 			path:   "/order/*",
 		},
 		{
@@ -97,6 +101,10 @@ func TestRouter_AddRoute(t *testing.T) {
 							"detail": &node{
 								path:    "detail",
 								handler: mockHandler,
+								paramChild: &node{
+									path:    ":id",
+									handler: mockHandler,
+								},
 							},
 						},
 						starChild: &node{
@@ -167,6 +175,21 @@ func TestRouter_Path_Repetition(t *testing.T) {
 	}, "web:路由冲突，重复注册[/a/b/c]")
 }
 
+// 路径参数匹配冲突
+func TestRoute_Path_Conflict(t *testing.T) {
+	r := newRouter()
+	r.addRoute(http.MethodGet, "/a/*", mockHandler)
+	assert.Panicsf(t, func() {
+		r.addRoute(http.MethodGet, "/a/:id", mockHandler)
+	}, "web:不允许同时注册路径参数通配符匹配,已有通配符匹配！")
+
+	r = newRouter()
+	r.addRoute(http.MethodGet, "/a/:id", mockHandler)
+	assert.Panicsf(t, func() {
+		r.addRoute(http.MethodGet, "/a/*", mockHandler)
+	}, "web:不允许同时注册路径参数通配符匹配，已有路径参数匹配！")
+}
+
 // 测试查找路由
 func TestRouter_findRoute(t *testing.T) {
 	testRoutes := []struct {
@@ -209,6 +232,10 @@ func TestRouter_findRoute(t *testing.T) {
 			method: http.MethodPost,
 			path:   "/login",
 		},
+		{
+			method: http.MethodPost,
+			path:   "/login/:username",
+		},
 	}
 
 	r := newRouter()
@@ -221,7 +248,7 @@ func TestRouter_findRoute(t *testing.T) {
 		path        string
 		description string
 		wantFound   bool
-		wantNode    *node
+		info        *matchInfo
 	}{
 		{
 			name:        "method no found",
@@ -243,9 +270,11 @@ func TestRouter_findRoute(t *testing.T) {
 			path:        "/order/detail",
 			description: "完全命中",
 			wantFound:   true,
-			wantNode: &node{
-				handler: mockHandler,
-				path:    "detail",
+			info: &matchInfo{
+				n: &node{
+					handler: mockHandler,
+					path:    "detail",
+				},
 			},
 		},
 		{
@@ -254,9 +283,11 @@ func TestRouter_findRoute(t *testing.T) {
 			path:        "/order/abc",
 			description: "通配符匹配",
 			wantFound:   true,
-			wantNode: &node{
-				handler: mockHandler,
-				path:    "*",
+			info: &matchInfo{
+				n: &node{
+					handler: mockHandler,
+					path:    "*",
+				},
 			},
 		},
 		{
@@ -265,13 +296,15 @@ func TestRouter_findRoute(t *testing.T) {
 			path:        "/order",
 			description: "命中了，但是没有Handler",
 			wantFound:   true,
-			wantNode: &node{
-				//handler: mockHandler,
-				path: "order",
-				children: map[string]*node{
-					"detail": &node{
-						handler: mockHandler,
-						path:    "detail",
+			info: &matchInfo{
+				n: &node{
+					//handler: mockHandler,
+					path: "order",
+					children: map[string]*node{
+						"detail": &node{
+							handler: mockHandler,
+							path:    "detail",
+						},
 					},
 				},
 			},
@@ -282,9 +315,27 @@ func TestRouter_findRoute(t *testing.T) {
 			path:        "/",
 			description: "根节点",
 			wantFound:   true,
-			wantNode: &node{
-				path:    "/",
-				handler: mockHandler,
+			info: &matchInfo{
+				n: &node{
+					path:    "/",
+					handler: mockHandler,
+				},
+			},
+		},
+		{
+			name:        "login username",
+			method:      http.MethodPost,
+			path:        "/login/huhouhua",
+			description: "路径参数匹配",
+			wantFound:   true,
+			info: &matchInfo{
+				n: &node{
+					path:    ":username",
+					handler: mockHandler,
+				},
+				pathParams: map[string]string{
+					"username": "huhouhua",
+				},
 			},
 		},
 	}
@@ -298,13 +349,15 @@ func TestRouter_findRoute(t *testing.T) {
 			if !found {
 				return
 			}
-			assert.Equal(t, tc.wantNode.path, n.path)
+			assert.Equal(t, tc.info.n.path, n.n.path)
 
-			msg, ok := tc.wantNode.equal(n)
+			assert.Equal(t, tc.info.pathParams, n.pathParams)
+			msg, ok := tc.info.n.equal(n.n)
 			assert.True(t, ok, msg)
 
-			msg, ok = equalHandler(tc.wantNode.handler, n.handler)
+			msg, ok = equalHandler(tc.info.n.handler, n.n.handler)
 			assert.True(t, ok, msg)
+
 		})
 	}
 
@@ -338,6 +391,12 @@ func (n *node) equal(y *node) (string, bool) {
 	}
 	if n.starChild != nil {
 		msg, ok := n.starChild.equal(y.starChild)
+		if !ok {
+			return msg, ok
+		}
+	}
+	if n.paramChild != nil {
+		msg, ok := n.paramChild.equal(y.paramChild)
 		if !ok {
 			return msg, ok
 		}

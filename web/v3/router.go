@@ -20,8 +20,16 @@ type node struct {
 	//通匹符匹配
 	starChild *node
 
+	//路径参数
+	paramChild *node
+
 	//用户注册处理逻辑
 	handler HandlerFunc
+}
+
+type matchInfo struct {
+	n          *node
+	pathParams map[string]string
 }
 
 func newRouter() *router {
@@ -32,7 +40,22 @@ func newRouter() *router {
 
 // 创建子节点
 func (n *node) childOfCreate(seg string) *node {
+	//参数匹配
+	if seg[0] == ':' {
+		if n.starChild != nil {
+			panic("web:不允许同时注册路径参数通配符匹配,已有通配符匹配！")
+		}
+		n.paramChild = &node{
+			path: seg,
+		}
+		return n.paramChild
+	}
+	//通配符匹配
 	if seg == "*" {
+		if n.paramChild != nil {
+			panic("web:不允许同时注册路径参数通配符匹配，已有路径参数匹配！")
+		}
+
 		n.starChild = &node{
 			path: seg,
 		}
@@ -52,41 +75,70 @@ func (n *node) childOfCreate(seg string) *node {
 }
 
 // childOf 优先匹配静态匹配，匹配不上，再考虑通配符匹配
-func (n *node) childOf(path string) (*node, bool) {
+
+// 第一个返回值是 子节点
+// 第二个返回值是 标记是否是路径参数
+// 第三个返回值是 有没有匹配到节点
+func (n *node) childOf(path string) (*node, bool, bool) {
 	if n.children == nil {
-		return n.starChild, n.starChild != nil
+
+		if n.paramChild != nil {
+			return n.paramChild, true, true
+		}
+
+		return n.starChild, false, n.starChild != nil
 	}
 	child, ok := n.children[path]
 	if !ok {
-		return n.starChild, n.starChild != nil
+
+		if n.paramChild != nil {
+			return n.paramChild, true, true
+		}
+		return n.starChild, false, n.starChild != nil
 	}
-	return child, ok
+	return child, false, ok
 }
 
-func (r *router) findRouter(method string, path string) (*node, bool) {
+// 查找路由匹配
+func (r *router) findRouter(method string, path string) (*matchInfo, bool) {
 	//找出对应的请求方式
 	root, ok := r.trees[method]
 	if !ok {
 		return nil, false
 	}
-
 	if path == "/" {
-		return root, true
+		return &matchInfo{
+			n: root,
+		}, true
 	}
 
 	//把前缀和后缀的 / 都去掉
 	path = strings.Trim(path, "/")
 	segs := strings.Split(path, "/")
+
+	var pathParams map[string]string
+
 	for _, seg := range segs {
-		child, found := root.childOf(seg)
+		child, isParam, found := root.childOf(seg)
 		if !found {
 			return nil, false
+		}
+		//命中了路径参数
+		if isParam {
+			if pathParams == nil {
+				pathParams = make(map[string]string)
+			}
+			//path 是:id 这种形式
+			pathParams[child.path[1:]] = seg
 		}
 		//找到了，赋值
 		root = child
 	}
 	//找到了，返回节点
-	return root, true
+	return &matchInfo{
+		n:          root,
+		pathParams: pathParams,
+	}, true
 }
 
 func (r *router) addRoute(method string, path string, handlerFunc HandlerFunc) {

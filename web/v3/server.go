@@ -64,14 +64,15 @@ func (h *HTTPServer) ServeHTTP(writer http.ResponseWriter, request *http.Request
 }
 
 func (h *HTTPServer) serve(ctx *Context) {
-	n, ok := h.findRouter(ctx.Request.Method, ctx.Request.URL.Path)
-	if !ok || n.handler == nil {
+	info, ok := h.findRouter(ctx.Request.Method, ctx.Request.URL.Path)
+	if !ok || info.n.handler == nil {
 		//没有找到此路由, 返回404
 		ctx.Response.WriteHeader(http.StatusNotFound)
 		_, _ = ctx.Response.Write([]byte("NOT FOUND"))
 		return
 	}
-	n.handler(ctx)
+	ctx.PathParams = info.pathParams
+	info.n.handler(ctx)
 }
 
 func (h *HTTPServer) Start(addr string) error {
