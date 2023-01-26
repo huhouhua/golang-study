@@ -31,6 +31,21 @@ func (c *Context) newDecoder() (error, *json.Decoder) {
 	return nil, json.NewDecoder(c.Request.Body)
 }
 
+func (c *Context) RespJSON(status int, val any) error {
+	data, err := json.Marshal(val)
+	if err != nil {
+		return err
+	}
+	c.Response.WriteHeader(status)
+	//c.Response.Header().Set("Content-Type", "application/json")
+	//c.Response.Header().Set("Content-Length", strconv.Itoa(len(data)))
+	n, err := c.Response.Write(data)
+	if n != len(data) {
+		return errors.New("web:未写入全部数据")
+	}
+	return err
+}
+
 func (c *Context) BindJSON(val any) error {
 	if val == "" {
 		return errors.New("web: 输入为 nil")
