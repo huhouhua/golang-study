@@ -31,6 +31,10 @@ func (c *Context) newDecoder() (error, *json.Decoder) {
 	return nil, json.NewDecoder(c.Request.Body)
 }
 
+func (c *Context) SetCookie(ck *http.Cookie) {
+	http.SetCookie(c.Response, ck)
+}
+
 // RespJSON 设置返回数据
 func (c *Context) RespJSON(status int, val any) error {
 	data, err := json.Marshal(val)
@@ -45,6 +49,10 @@ func (c *Context) RespJSON(status int, val any) error {
 		return errors.New("web:未写入全部数据")
 	}
 	return err
+}
+
+func (c *Context) RespJSONOK(val any) error {
+	return c.RespJSON(http.StatusOK, val)
 }
 
 func (c *Context) BindJSON(val any) error {

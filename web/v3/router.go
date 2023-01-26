@@ -75,7 +75,6 @@ func (n *node) childOfCreate(seg string) *node {
 }
 
 // childOf 优先匹配静态匹配，匹配不上，再考虑通配符匹配
-
 // 第一个返回值是 子节点
 // 第二个返回值是 标记是否是路径参数
 // 第三个返回值是 有没有匹配到节点
