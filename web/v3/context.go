@@ -65,3 +65,11 @@ func (c *Context) BindJSONDisallowUnknownFields(val any) error {
 
 	return decoder.Decode(val)
 }
+
+func (c *Context) FormValue(key string) (string, error) {
+	err := c.Request.ParseForm()
+	if err != nil {
+		return "", nil
+	}
+	return c.Request.FormValue(key), nil
+}
