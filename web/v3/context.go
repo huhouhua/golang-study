@@ -31,6 +31,7 @@ func (c *Context) newDecoder() (error, *json.Decoder) {
 	return nil, json.NewDecoder(c.Request.Body)
 }
 
+// RespJSON 设置返回数据
 func (c *Context) RespJSON(status int, val any) error {
 	data, err := json.Marshal(val)
 	if err != nil {
