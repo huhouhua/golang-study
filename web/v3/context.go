@@ -4,17 +4,24 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"net/url"
 )
-
-//var (
-//	JSONUseNumber             = true
-//	JSONDisallowUnknownFileds = true
-//)
 
 type Context struct {
 	Request    *http.Request
 	Response   http.ResponseWriter
 	PathParams map[string]string
+
+	queryValues url.Values
+}
+
+type StringValue struct {
+	val string
+	err error
+}
+
+func newStringValue(val string, err error) StringValue {
+	return StringValue{val: val, err: err}
 }
 
 func (c *Context) newDecoder() (error, *json.Decoder) {
@@ -35,7 +42,7 @@ func (c *Context) BindJSON(val any) error {
 	return decoder.Decode(val)
 }
 
-// 表示:数字就用Number来表示
+// BindJSONNumber 表示:数字就用Number来表示
 // 否则默认是 float64
 func (c *Context) BindJSONNumber(val any) error {
 	if val == "" {
@@ -50,7 +57,7 @@ func (c *Context) BindJSONNumber(val any) error {
 	return decoder.Decode(val)
 }
 
-// 如果有一个未知的字段，就会保错
+// BindJSONDisallowUnknownFields 如果有一个未知的字段，就会保错
 // 比如说你 User只有Name和Email两个字段
 // JSON 里面额外多了一个Age字段，那么就会报错
 func (c *Context) BindJSONDisallowUnknownFields(val any) error {
@@ -66,10 +73,32 @@ func (c *Context) BindJSONDisallowUnknownFields(val any) error {
 	return decoder.Decode(val)
 }
 
-func (c *Context) FormValue(key string) (string, error) {
+// FormValue 获取表单数据
+func (c *Context) FormValue(key string) StringValue {
 	err := c.Request.ParseForm()
 	if err != nil {
-		return "", nil
+		return newStringValue("", nil)
 	}
-	return c.Request.FormValue(key), nil
+	return newStringValue(c.Request.FormValue(key), nil)
+}
+
+// QueryValue 获取请求URL上的值
+func (c *Context) QueryValue(key string) StringValue {
+	if c.queryValues == nil {
+		c.queryValues = c.Request.URL.Query()
+	}
+	vals, ok := c.queryValues[key]
+	if !ok || len(vals) == 0 {
+		return newStringValue("", errors.New("web: key 不存在"))
+	}
+	return newStringValue(vals[0], nil)
+}
+
+// PathValue 获取路由参数的值
+func (c *Context) PathValue(key string) StringValue {
+	val, ok := c.PathParams[key]
+	if !ok {
+		return newStringValue("", errors.New("web: key 不存在！"))
+	}
+	return newStringValue(val, nil)
 }
