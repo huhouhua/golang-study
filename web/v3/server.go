@@ -22,15 +22,30 @@ type Server interface {
 
 type HTTPServer struct {
 	*router
+
+	//中间件处理
+	mdls []Middleware
 }
+
+type HTTPServerOption func(server *HTTPServer)
 
 type HTTPSServer struct {
 	HTTPServer
 }
 
-func NewHTTPServer() *HTTPServer {
-	return &HTTPServer{
+func NewHTTPServer(opts ...HTTPServerOption) *HTTPServer {
+	res := &HTTPServer{
 		router: newRouter(),
+	}
+	for _, opt := range opts {
+		opt(res)
+	}
+	return res
+}
+
+func ServerWithMiddleware(mdls ...Middleware) HTTPServerOption {
+	return func(server *HTTPServer) {
+		server.mdls = mdls
 	}
 }
 
@@ -60,7 +75,18 @@ func (h *HTTPServer) ServeHTTP(writer http.ResponseWriter, request *http.Request
 		Request:  request,
 		Response: writer,
 	}
-	h.serve(ctx)
+	// 最后一个是这个
+	root := h.serve
+
+	//然后这里就是利用最后一个不断往前面组装链条
+	//从后往前
+	//把后一个作为前一个的next 构造好链条
+	for i := len(h.mdls) - 1; i >= 0; i-- {
+		root = h.mdls[i](root)
+	}
+	//这里执行的时候，就是从前往后
+	root(ctx)
+
 }
 
 func (h *HTTPServer) serve(ctx *Context) {
@@ -72,6 +98,7 @@ func (h *HTTPServer) serve(ctx *Context) {
 		return
 	}
 	ctx.PathParams = info.pathParams
+	ctx.MatchedRoute = info.n.router
 	info.n.handler(ctx)
 }
 

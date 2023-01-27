@@ -13,6 +13,8 @@ type Context struct {
 	PathParams map[string]string
 
 	queryValues url.Values
+
+	MatchedRoute string
 }
 
 type StringValue struct {
