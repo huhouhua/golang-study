@@ -26,7 +26,7 @@ func (m MiddlewareBuilder) Build() v3.Middleware {
 			//尝试和客户端的trace结合在一起
 			reqCtx = otel.GetTextMapPropagator().Extract(reqCtx, propagation.HeaderCarrier(ctx.Request.Header))
 
-			_, span := m.Tracer.Start(reqCtx, "unknown")
+			reqCtx, span := m.Tracer.Start(reqCtx, "unknown")
 			defer span.End()
 
 			//按照自己的情况，记录需要的请求数据
@@ -35,10 +35,15 @@ func (m MiddlewareBuilder) Build() v3.Middleware {
 			span.SetAttributes(attribute.String("http.scheme", ctx.Request.URL.Scheme))
 			span.SetAttributes(attribute.String("http.host", ctx.Request.Host))
 
+			ctx.Request = ctx.Request.WithContext(reqCtx)
+			//ctx.Ctx = reqCtx
+
 			next(ctx)
 
-			//这个是next执行完，才有的值。
+			// 最后执行完，设置路由，当做链路名称
 			span.SetName(ctx.MatchedRoute)
+
+			span.SetAttributes(attribute.Int("http.status", ctx.ResponseStatusCode))
 		}
 	}
 }

@@ -8,7 +8,11 @@ require (
 	github.com/kataras/iris/v12 v12.1.8
 	github.com/labstack/echo/v4 v4.10.0
 	github.com/stretchr/testify v1.8.1
-	go.opentelemetry.io/otel/trace v1.8.0
+	go.opentelemetry.io/otel v1.11.2
+	go.opentelemetry.io/otel/exporters/jaeger v1.11.2
+	go.opentelemetry.io/otel/exporters/zipkin v1.11.2
+	go.opentelemetry.io/otel/sdk v1.11.2
+	go.opentelemetry.io/otel/trace v1.11.2
 	golang.org/x/net v0.5.0
 	google.golang.org/grpc v1.52.0
 	google.golang.org/protobuf v1.28.1
@@ -28,6 +32,8 @@ require (
 	github.com/eknkc/amber v0.0.0-20171010120322-cdade1c07385 // indirect
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
+	github.com/go-logr/logr v1.2.3 // indirect
+	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.0 // indirect
 	github.com/go-playground/validator/v10 v10.11.1 // indirect
@@ -57,6 +63,7 @@ require (
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/moul/http2curl v1.0.0 // indirect
+	github.com/openzipkin/zipkin-go v0.4.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.0.6 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
@@ -77,7 +84,6 @@ require (
 	github.com/yalp/jsonpath v0.0.0-20180802001716-5cc68e5049a0 // indirect
 	github.com/yudai/gojsondiff v1.0.0 // indirect
 	github.com/yudai/golcs v0.0.0-20170316035057-ecda9a501e82 // indirect
-	go.opentelemetry.io/otel v1.8.0 // indirect
 	golang.org/x/crypto v0.5.0 // indirect
 	golang.org/x/sys v0.4.0 // indirect
 	golang.org/x/text v0.6.0 // indirect

@@ -8,22 +8,31 @@ import (
 )
 
 type Context struct {
-	Request    *http.Request
-	Response   http.ResponseWriter
+	Request  *http.Request
+	Response http.ResponseWriter
+
+	//Ctx        context.Context
+
+	ResponseData       []byte
+	ResponseStatusCode int
+
+	//路由上的参数值
 	PathParams map[string]string
 
+	//url上的参数
 	queryValues url.Values
 
+	//路由名称
 	MatchedRoute string
 }
 
 type StringValue struct {
-	val string
-	err error
+	Val string
+	Err error
 }
 
 func newStringValue(val string, err error) StringValue {
-	return StringValue{val: val, err: err}
+	return StringValue{Val: val, Err: err}
 }
 
 func (c *Context) newDecoder() (error, *json.Decoder) {
@@ -46,10 +55,12 @@ func (c *Context) RespJSON(status int, val any) error {
 	c.Response.WriteHeader(status)
 	//c.Response.Header().Set("Content-Type", "application/json")
 	//c.Response.Header().Set("Content-Length", strconv.Itoa(len(data)))
-	n, err := c.Response.Write(data)
-	if n != len(data) {
-		return errors.New("web:未写入全部数据")
-	}
+	//n, err := c.Response.Write(data)
+	//if n != len(data) {
+	//	return errors.New("web:未写入全部数据")
+	//}
+	c.ResponseData = data
+	c.ResponseStatusCode = status
 	return err
 }
 

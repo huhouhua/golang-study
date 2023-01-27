@@ -1,6 +1,7 @@
 package v3
 
 import (
+	"fmt"
 	"net"
 	"net/http"
 )
@@ -25,6 +26,8 @@ type HTTPServer struct {
 
 	//中间件处理
 	mdls []Middleware
+
+	log func(msg string, args ...any)
 }
 
 type HTTPServerOption func(server *HTTPServer)
@@ -36,6 +39,9 @@ type HTTPSServer struct {
 func NewHTTPServer(opts ...HTTPServerOption) *HTTPServer {
 	res := &HTTPServer{
 		router: newRouter(),
+		log: func(msg string, args ...any) {
+			fmt.Printf(msg, args...)
+		},
 	}
 	for _, opt := range opts {
 		opt(res)
@@ -84,17 +90,38 @@ func (h *HTTPServer) ServeHTTP(writer http.ResponseWriter, request *http.Request
 	for i := len(h.mdls) - 1; i >= 0; i-- {
 		root = h.mdls[i](root)
 	}
-	//这里执行的时候，就是从前往后
-	root(ctx)
 
+	var m Middleware = func(next HandlerFunc) HandlerFunc {
+		return func(ctx *Context) {
+			next(ctx)
+
+			//最后设置到Response上  把ResponseStatusCode、ResponseData
+			h.flashResponse(ctx)
+		}
+	}
+	//这里执行的时候，就是从前往后
+	root = m(root)
+	root(ctx)
+}
+
+func (h *HTTPServer) flashResponse(ctx *Context) {
+	if ctx.ResponseStatusCode != 0 {
+		ctx.Response.WriteHeader(ctx.ResponseStatusCode)
+	}
+	n, err := ctx.Response.Write(ctx.ResponseData)
+	if err != nil || n != len(ctx.ResponseData) {
+		h.log("写入响应失败 %v", err)
+	}
 }
 
 func (h *HTTPServer) serve(ctx *Context) {
 	info, ok := h.findRouter(ctx.Request.Method, ctx.Request.URL.Path)
 	if !ok || info.n.handler == nil {
 		//没有找到此路由, 返回404
-		ctx.Response.WriteHeader(http.StatusNotFound)
-		_, _ = ctx.Response.Write([]byte("NOT FOUND"))
+		ctx.ResponseStatusCode = http.StatusNotFound
+		ctx.ResponseData = []byte("NOT FOUND")
+		//ctx.Response.WriteHeader(http.StatusNotFound)
+		//_, _ = ctx.Response.Write([]byte("NOT FOUND"))
 		return
 	}
 	ctx.PathParams = info.pathParams
