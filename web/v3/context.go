@@ -24,6 +24,8 @@ type Context struct {
 
 	//路由名称
 	MatchedRoute string
+
+	tplEngine TemplateEngine
 }
 
 type StringValue struct {
@@ -40,6 +42,17 @@ func (c *Context) newDecoder() (error, *json.Decoder) {
 		return errors.New("web: body为 nil"), nil
 	}
 	return nil, json.NewDecoder(c.Request.Body)
+}
+
+func (c *Context) Render(tplName string, data any) error {
+	var err error
+	c.ResponseData, err = c.tplEngine.Render(c.Request.Context(), tplName, data)
+	if err != nil {
+		c.ResponseStatusCode = http.StatusInternalServerError
+		return err
+	}
+	c.ResponseStatusCode = http.StatusOK
+	return nil
 }
 
 func (c *Context) SetCookie(ck *http.Cookie) {

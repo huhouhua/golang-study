@@ -28,6 +28,8 @@ type HTTPServer struct {
 	mdls []Middleware
 
 	log func(msg string, args ...any)
+
+	tplEngine TemplateEngine
 }
 
 type HTTPServerOption func(server *HTTPServer)
@@ -54,6 +56,11 @@ func ServerWithMiddleware(mdls ...Middleware) HTTPServerOption {
 		server.mdls = mdls
 	}
 }
+func ServerWithTemplateEngine(tplEngine TemplateEngine) HTTPServerOption {
+	return func(server *HTTPServer) {
+		server.tplEngine = tplEngine
+	}
+}
 
 func (h *HTTPServer) addRoute(method string, path string, handlerFunc HandlerFunc) {
 	h.router.addRoute(method, path, handlerFunc)
@@ -78,8 +85,9 @@ func (h *HTTPServer) Put(path string, handlerFunc HandlerFunc) {
 // 执行业务逻辑
 func (h *HTTPServer) ServeHTTP(writer http.ResponseWriter, request *http.Request) {
 	ctx := &Context{
-		Request:  request,
-		Response: writer,
+		Request:   request,
+		Response:  writer,
+		tplEngine: h.tplEngine,
 	}
 	// 最后一个是这个
 	root := h.serve

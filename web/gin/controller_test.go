@@ -16,7 +16,7 @@ func TestUserController(t *testing.T) {
 	//})
 	v1 := g.Group("/file")
 	{
-		v1.GET("/static", func(context *gin.Context) {
+		v1.GET("/assets", func(context *gin.Context) {
 			context.String(200, "this is file api !")
 		})
 	}
