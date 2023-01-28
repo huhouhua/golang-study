@@ -5,6 +5,7 @@ go 1.19
 require (
 	github.com/beego/beego/v2 v2.0.7
 	github.com/gin-gonic/gin v1.8.2
+	github.com/google/uuid v1.3.0
 	github.com/kataras/iris/v12 v12.1.8
 	github.com/labstack/echo/v4 v4.10.0
 	github.com/prometheus/client_golang v1.14.0
