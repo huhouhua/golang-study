@@ -23,5 +23,4 @@ func TestMiddlewareBuilder(t *testing.T) {
 		t.Fatal(err)
 	}
 	server.ServeHTTP(nil, req)
-
 }
