@@ -1,4 +1,4 @@
-package template_demo
+package template
 
 import (
 	"bytes"
