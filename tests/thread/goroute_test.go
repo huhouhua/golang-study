@@ -13,6 +13,7 @@ func TestInit(t *testing.T) {
 			fmt.Println(i)
 		}(i)
 	}
+
 	time.Sleep(time.Millisecond * 50)
 }
 
