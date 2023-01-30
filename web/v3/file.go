@@ -2,11 +2,13 @@ package v3
 
 import (
 	"github.com/google/uuid"
+	lru "github.com/hashicorp/golang-lru"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 type FileUploader struct {
@@ -88,4 +90,83 @@ func (u FileUploader) Handler() HandlerFunc {
 		ctx.ResponseData = []byte("上传成功！")
 
 	}
+}
+
+type StaticResourceHandlerOption func(handler *StaticResourceHandler)
+
+type StaticResourceHandler struct {
+	dir                     string
+	cache                   *lru.Cache
+	extensionContextTypeMap map[string]string
+	//大文件缓存
+	maxSize int
+}
+
+func NewStaticResourceHandler(dir string, opts ...StaticResourceHandlerOption) (*StaticResourceHandler, error) {
+	c, err := lru.New(100 * 1024 * 1024)
+	if err != nil {
+		return nil, err
+	}
+	res := &StaticResourceHandler{
+		dir:   dir,
+		cache: c,
+		//10 MB
+		maxSize: 1024 * 1024 * 10,
+		extensionContextTypeMap: map[string]string{
+			"jpeg": "image/jpeg",
+			"jpe":  "image/jpe",
+			"jpg":  "image/jpg",
+			"png":  "image/png",
+			"pdf":  "image/pdf",
+			"webp": "image/webp",
+		},
+	}
+	for _, opt := range opts {
+		opt(res)
+	}
+	return res, nil
+}
+
+func StaticWithMaxFileSize(maxSize int) StaticResourceHandlerOption {
+	return func(handler *StaticResourceHandler) {
+		handler.maxSize = maxSize
+	}
+}
+func StaticWithCahe(maxSize int) StaticResourceHandlerOption {
+	return func(handler *StaticResourceHandler) {
+		handler.maxSize = maxSize
+	}
+}
+func (s *StaticResourceHandler) Handle(ctx *Context) {
+
+	str := ctx.PathValue("file")
+	if str.Err != nil {
+		ctx.ResponseStatusCode = http.StatusBadRequest
+		ctx.ResponseData = []byte("请求路径不对！")
+		return
+	}
+	dst := filepath.Join(s.dir, str.Val)
+	ext := filepath.Ext(dst)
+	header := ctx.Response.Header()
+	if data, ok := s.cache.Get(str.Val); ok {
+		header.Set("Content-Type", s.extensionContextTypeMap[ext[1:]])
+		header.Set("Content-Length", strconv.Itoa(len(data.([]byte))))
+		ctx.ResponseData = data.([]byte)
+		ctx.ResponseStatusCode = http.StatusOK
+		return
+	}
+	data, err := os.ReadFile(dst)
+	if err != nil {
+		ctx.ResponseStatusCode = http.StatusInternalServerError
+		ctx.ResponseData = []byte("服务器错误！")
+		return
+	}
+	if len(data) <= s.maxSize {
+		s.cache.Add(str.Val, data)
+	}
+	header.Set("Content-Type", s.extensionContextTypeMap[ext[1:]])
+	header.Set("Content-Length", strconv.Itoa(len(data)))
+	ctx.ResponseData = data
+	ctx.ResponseStatusCode = http.StatusOK
+
 }

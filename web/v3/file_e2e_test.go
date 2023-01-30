@@ -40,12 +40,19 @@ func TestUpload(t *testing.T) {
 }
 
 func TestDownload(t *testing.T) {
-
 	h := NewHTTPServer()
 
 	fn := FileDownloader{
 		Dir: filepath.Join("../../", "assets", "download"),
 	}
 	h.Get("/download", fn.Handler())
+	h.Start(":8081")
+}
+func TestStaticResource_Handler(t *testing.T) {
+	h := NewHTTPServer()
+
+	s, err := NewStaticResourceHandler(filepath.Join("../../", "assets/static"))
+	require.NoError(t, err)
+	h.Get("/static/:file", s.Handle)
 	h.Start(":8081")
 }
