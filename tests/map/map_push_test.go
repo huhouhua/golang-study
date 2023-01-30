@@ -14,7 +14,6 @@ func TestTravelMap(t *testing.T) {
 }
 
 func TestObjEqual(t *testing.T) {
-
 	u1 := User{
 		Name: "张三",
 		Id:   123,
