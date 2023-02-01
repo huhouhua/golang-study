@@ -12,6 +12,21 @@ func TestDefer(t *testing.T) {
 	defer fmt.Printf("second defer: %d \n", m)
 }
 
+func TestBeforeDefer(t *testing.T) {
+	funcPanic()
+}
+func funcPanic() {
+	defer func() {
+		fmt.Println("第一个defer")
+	}()
+	a := true
+	if a {
+		panic("异常！")
+	}
+	defer func() {
+		fmt.Println("第二个defer")
+	}()
+}
 func funcDefer() (sum int) {
 	sumA := 100
 	sumB := 100

@@ -19,5 +19,4 @@ func TestMiddlewareBuilder_Build(t *testing.T) {
 		panic("方发生panic了")
 	})
 	server.Start(":8081")
-
 }
