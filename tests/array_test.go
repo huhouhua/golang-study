@@ -53,7 +53,6 @@ func TestInitArray(t *testing.T) {
 	//t.Log(arr)
 	initArraySecond(arr)
 	t.Log(arr)
-
 }
 
 func initArray(arr []int) {
