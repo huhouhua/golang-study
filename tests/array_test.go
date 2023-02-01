@@ -62,3 +62,41 @@ func initArray(arr []int) {
 func initArraySecond(arr *[]int) {
 	arr = &[]int{4, 5, 6}
 }
+
+func TestInitArraySecond(t *testing.T) {
+	arr := []*User{
+		&User{
+			Name: "张三",
+		}, &User{
+			Name: "张三2",
+		}, &User{
+			Name: "张三3",
+		}}
+	//initUser(arr)
+	initUserSecond(arr)
+	for _, user := range arr {
+		t.Logf("%v", user)
+	}
+
+}
+func initUser(arr []User) {
+	arr = []User{
+		User{
+			Name: "张三1",
+		}, User{
+			Name: "张三4",
+		}, User{
+			Name: "张三5",
+		}}
+
+}
+func initUserSecond(arr []*User) {
+	arr = []*User{
+		&User{
+			Name: "张三1",
+		}, &User{
+			Name: "张三4",
+		}, &User{
+			Name: "张三5",
+		}}
+}
