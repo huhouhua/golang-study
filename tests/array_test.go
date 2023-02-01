@@ -46,3 +46,20 @@ func TestSlice(t *testing.T) {
 	}
 	t.Logf("len:%d cap:%d", len(arr), cap(arr))
 }
+
+func TestInitArray(t *testing.T) {
+	arr := &[]int{1, 2, 3, 4}
+	//initArray(arr)
+	//t.Log(arr)
+	initArraySecond(arr)
+	t.Log(arr)
+
+}
+
+func initArray(arr []int) {
+	arr = []int{4, 5, 6}
+
+}
+func initArraySecond(arr *[]int) {
+	arr = &[]int{4, 5, 6}
+}
