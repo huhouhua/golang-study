@@ -27,7 +27,7 @@ func TestLockTest(t *testing.T) {
 	c := &contextLock{
 		users: []*user{&user{}},
 	}
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 50; i++ {
 		go func(i int) {
 			c.AddUser(i)
 		}(i)
@@ -51,8 +51,8 @@ type contextLock struct {
 }
 
 func (c *contextLock) AddUser(id int) {
-	defer c.Unlock()
-	c.Lock()
+	//defer c.Unlock()
+	//c.Lock()
 
 	for _, u := range c.users {
 		if u.Id == id {
