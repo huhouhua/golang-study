@@ -23,9 +23,9 @@ func TestCounter(t *testing.T) {
 }
 
 func TestLockTest(t *testing.T) {
-	ctx, _ := context.WithTimeout(context.TODO(), time.Second*10)
+	ctx, _ := context.WithTimeout(context.TODO(), time.Second*5)
 	c := &contextLock{
-		users: []*user{&user{}},
+		users: []*user{},
 	}
 	for i := 0; i < 50; i++ {
 		go func(i int) {
