@@ -29,11 +29,11 @@ func TestLockTest(t *testing.T) {
 	}
 	for i := 0; i < 100; i++ {
 		go func(i int) {
-			c.updateName(i)
+			c.AddUser(i)
 		}(i)
 		for i := 0; i < 10; i++ {
 			go func(i int) {
-				c.updateName(i)
+				c.AddUser(i)
 			}(i)
 		}
 	}
@@ -50,7 +50,7 @@ type contextLock struct {
 	users []*user
 }
 
-func (c *contextLock) updateName(id int) {
+func (c *contextLock) AddUser(id int) {
 	defer c.Unlock()
 	c.Lock()
 
