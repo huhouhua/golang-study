@@ -23,7 +23,7 @@ func TestCounter(t *testing.T) {
 }
 
 func TestLockTest(t *testing.T) {
-	ctx, _ := context.WithTimeout(context.TODO(), time.Second*5)
+	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*5)
 	c := &contextLock{
 		users: []*user{},
 	}
@@ -37,6 +37,7 @@ func TestLockTest(t *testing.T) {
 			}(i)
 		}
 	}
+	defer cancel()
 	select {
 	case <-ctx.Done():
 		for _, u := range c.users {
