@@ -8,7 +8,8 @@ import (
 
 func main() {
 	//WithTimeout()
-	WithCancel()
+	//WithCancel()
+	WithDeadline()
 }
 
 func WithTimeout() {
@@ -19,7 +20,7 @@ func WithTimeout() {
 	for {
 		select {
 		case <-ctx.Done():
-			fmt.Println("5秒到了 完成！")
+			fmt.Println("手动信号 5秒到了 完成！")
 			return
 		default:
 			fmt.Println("default!")
@@ -41,12 +42,35 @@ func WithCancel() {
 	for {
 		select {
 		case <-ctx.Done():
-			fmt.Println("被取消！")
+			fmt.Println("收到信号 被取消！")
 			return
 		default:
 			fmt.Println("等待中!")
 			time.Sleep(time.Second)
 		}
 	}
+
+}
+func WithDeadline() {
+
+	//创建一个子节点的context,3秒后自动取消
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(time.Second*3))
+
+	defer cancel()
+
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				fmt.Println("时间到了 完成！")
+				return
+			default:
+				fmt.Println("等待中!")
+				time.Sleep(time.Second)
+			}
+		}
+	}()
+	fmt.Println("开始等待5秒钟 等待ctx被自动取消！,time=", time.Now().Unix())
+	time.Sleep(time.Second * 5)
 
 }
