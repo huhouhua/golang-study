@@ -25,7 +25,7 @@ func main() {
 		Secure: useSSL,
 	})
 	if err != nil {
-		panic(fmt.Sprintf("连接失败 %s", err.Error()))
+		panic(fmt.Sprintf("创建连接失败 %s", err.Error()))
 	}
 	//upload(minioClient)
 	download(minioClient)
