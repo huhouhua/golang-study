@@ -35,7 +35,7 @@ func CreateToken(payload jwt.Claims, secret []byte) (string, error) {
 	return tokenString, nil
 }
 
-func GeneralJwtToken(userName string, id string) (string, error) {
+func GeneralJwtToken(userName string) (string, error) {
 	claims := AuthClaims{
 		Username: userName,
 		StandardClaims: jwt.StandardClaims{

@@ -30,7 +30,7 @@ func (a *AuthzController) Login(c *gin.Context) {
 		c.JSON(http.StatusOK, "密码不正确！")
 		return
 	}
-	token, err := authorization.GeneralJwtToken(username, user.ID)
+	token, err := authorization.GeneralJwtToken(username)
 	if err != nil {
 		c.JSON(http.StatusOK, err.Error())
 		return
