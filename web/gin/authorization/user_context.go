@@ -23,7 +23,7 @@ func NewUserProvider(ctx gin.Context) IUserContext {
 func (u *UserContext) GetUserInfo() (*UserInfo, error) {
 	userName := u.ctx.GetHeader("user")
 	if userName == "" {
-		return nil, errors.New("handler 用户名字段为空！")
+		return nil, errors.New("header 用户名字段为空！")
 	}
 	user, err := services.GetInfo(userName)
 	if err != nil {
