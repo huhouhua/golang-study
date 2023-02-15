@@ -5,12 +5,14 @@ go 1.19
 require (
 	github.com/beego/beego/v2 v2.0.7
 	github.com/gin-gonic/gin v1.8.2
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.3.0
 	github.com/hashicorp/golang-lru v0.5.4
 	github.com/kataras/iris/v12 v12.1.8
 	github.com/labstack/echo/v4 v4.10.0
 	github.com/mailru/easyjson v0.7.7
 	github.com/prometheus/client_golang v1.14.0
+	github.com/rs/xid v1.4.0
 	github.com/smartystreets/goconvey v1.7.2
 	github.com/stretchr/testify v1.8.1
 	go.opentelemetry.io/otel v1.11.2
@@ -83,7 +85,6 @@ require (
 	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
-	github.com/rs/xid v1.4.0 // indirect
 	github.com/ryanuber/columnize v2.1.2+incompatible // indirect
 	github.com/schollz/closestmatch v2.1.0+incompatible // indirect
 	github.com/sergi/go-diff v1.1.0 // indirect
