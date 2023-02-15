@@ -6,21 +6,21 @@ import (
 	"golang-study/web/gin/services"
 )
 
-type IUserContext interface {
+type IContextUser interface {
 	GetUserInfo() (*UserInfo, error)
 	GetToken() string
 }
-type UserContext struct {
+type ContextUser struct {
 	ctx gin.Context
 }
 
-func NewUserProvider(ctx gin.Context) IUserContext {
-	return &UserContext{
+func NewUserProvider(ctx gin.Context) IContextUser {
+	return &ContextUser{
 		ctx: ctx,
 	}
 }
 
-func (u *UserContext) GetUserInfo() (*UserInfo, error) {
+func (u *ContextUser) GetUserInfo() (*UserInfo, error) {
 	userName := u.ctx.GetHeader("user")
 	if userName == "" {
 		return nil, errors.New("header 用户名字段为空！")
@@ -32,6 +32,6 @@ func (u *UserContext) GetUserInfo() (*UserInfo, error) {
 	return NewUserInfo(user.ID, user.Name, user.Password, u.GetToken()), nil
 }
 
-func (u *UserContext) GetToken() string {
+func (u *ContextUser) GetToken() string {
 	return u.ctx.GetHeader("token")
 }
