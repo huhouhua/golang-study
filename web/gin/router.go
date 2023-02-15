@@ -17,7 +17,7 @@ func register() {
 			authCtrl := authorize.NewAuthzController()
 
 			authRouter.POST("login", authCtrl.Login)
-			authRouter.GET("logout", authCtrl.LoginOut)
+			authRouter.GET("loginout", authCtrl.LoginOut)
 		}
 
 		userRouter := apiv1Group.Group("/user")
