@@ -23,9 +23,9 @@ func register() {
 		userRouter := apiv1Group.Group("/user")
 		{
 			userRouter.Use(authorization.TokenAuth())
-			user := user.NewUserController()
+			userCtrl := user.NewUserController()
 
-			userRouter.GET("/:id", user.UserInfo)
+			userRouter.GET("/:id", userCtrl.UserInfo)
 		}
 	}
 
