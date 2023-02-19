@@ -20,4 +20,5 @@ func Test_GenPassword(t *testing.T) {
 	password := fmt.Sprintf("%x", s.Sum(nil))
 
 	assert.Equal(t, password, "b5cf498b70a176efeacbc5b07d88e0da76a7f4cb")
+
 }
